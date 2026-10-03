@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ADBDevice: Identifiable, Hashable, Sendable {
+public struct ADBDevice: Identifiable, Hashable, Codable, Sendable {
     public let id: String
     public let host: String
     public let port: UInt16
@@ -13,7 +13,7 @@ public struct ADBDevice: Identifiable, Hashable, Sendable {
     }
 }
 
-public enum TransportKind: String, Sendable { case tcp, tls, wifiPairing }
+public enum TransportKind: String, Codable, Sendable { case tcp, tls, wifiPairing }
 
 public enum ADBError: Error, LocalizedError, Sendable {
     case invalidPacket, protocolError(String), connectionClosed, timeout
@@ -36,7 +36,7 @@ public enum ADBError: Error, LocalizedError, Sendable {
     }
 }
 
-public struct ADBCommandResult: Sendable {
+public struct ADBCommandResult: Codable, Sendable {
     public let output: String
     public let exitCode: Int32?
     public init(output: String, exitCode: Int32? = nil) { self.output = output; self.exitCode = exitCode }
