@@ -7,7 +7,7 @@ This branch combines the planned MR1–MR10 work into one reviewable change.
 | 1 | Modern package and CI | `Package.swift`, `ADBKit`, Swift tests, GitHub Actions, iOS local-network declarations |
 | 2 | Protocol core | packet framing, typed errors, direct transport abstraction, serialized actor client |
 | 3 | Legacy TCP/RSA boundary | TCP transport and host-key storage seam; old Objective-C API remains source-compatible |
-| 4 | Pairing and key management | Keychain store and explicit AOSP/BoringSSL provider boundary; no custom crypto |
+| 4 | Pairing and key management | Keychain store plus AOSP-compatible SPAKE2/HKDF/AES-GCM native adapter backed by BoringSSL |
 | 5 | Discovery | Bonjour `_adb-tls-pairing` browser and device model |
 | 6 | Wi-Fi 2.0 | TLS transport selection and pairing service contracts, ready for AOSP implementation |
 | 7 | Device services | shell, install, uninstall and result model |
@@ -17,12 +17,21 @@ This branch combines the planned MR1–MR10 work into one reviewable change.
 
 ## Explicit boundaries
 
-The production pairing handshake must reuse the AOSP/BoringSSL implementation. A
-new cryptographic protocol in this repository would be unsafe and incompatible
-with Android's implementation. The current provider therefore fails explicitly
-until that dependency is linked by the host application.
+The pairing crypto path reuses the AOSP/BoringSSL primitives. A new
+cryptographic protocol in this repository would be unsafe and incompatible with
+Android's implementation. The host must provide a platform-built BoringSSL
+root through `ADBKIT_BORINGSSL_ROOT`; without it the package compiles with a
+fail-closed stub and reports `pairingUnavailable`.
+
+CI builds the pinned BoringSSL revision and runs client/server interoperability
+tests against the native adapter. The revision is pinned in
+`.github/workflows/ios.yml` so crypto changes are reviewed explicitly.
+
+The remaining transport work is deliberately separate: `AOSPWiFiPairingProvider`
+now exposes the real crypto engine, while the TLS 1.3 socket/certificate
+exchange still has to be wired to the host's pairing connection. This prevents
+shipping a misleading plaintext or non-AOSP fallback.
 
 The legacy Objective-C target is kept during migration. New consumers should
 use `ADBKit` and `DeviceBackend`; the legacy `AdbClient` will be removed after
 the app target is migrated.
-

@@ -53,4 +53,14 @@ swift test
 The legacy Objective-C sample remains for compatibility, while new integrations should use `Sources/ADBKit`.
 The production Wi‑Fi pairing implementation must link the AOSP/BoringSSL pairing code; this project intentionally does not implement custom cryptography.
 
+To enable the real AOSP pairing crypto adapter, build BoringSSL for the current
+Apple platform and point SwiftPM at that build:
+
+```sh
+ADBKIT_BORINGSSL_ROOT=/path/to/boringssl-build swift test
+```
+
+The adapter calls BoringSSL's `SPAKE2_*` API and applies the AOSP pairing key
+schedule (`HKDF-SHA256` followed by `AES-128-GCM`). Without the variable, the
+package remains buildable for protocol work but pairing fails closed.
 

@@ -11,3 +11,24 @@ jobs:
         run: bash -n scripts/fetch-device-manager-ui.sh
       - name: Validate app metadata
         run: plutil -lint adb-ios/Info.plist
+
+  swift-package-boringssl:
+    name: AOSP pairing crypto
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned BoringSSL
+        uses: actions/checkout@v4
+        with:
+          repository: google/boringssl
+          ref: dd73e69a4e86fa178a4d19033c691e9b42cc1088
+          path: .build/boringssl-source
+      - name: Build BoringSSL crypto library
+        run: |
+          cmake -S .build/boringssl-source -B .build/boringssl-source/build \
+            -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          cmake --build .build/boringssl-source/build --target crypto
+      - name: Test AOSP pairing crypto
+        env:
+          ADBKIT_BORINGSSL_ROOT: ${{ github.workspace }}/.build/boringssl-source
+        run: swift test --filter ADBPairingCryptoTests

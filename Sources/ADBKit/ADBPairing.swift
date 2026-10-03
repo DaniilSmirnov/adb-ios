@@ -102,8 +102,11 @@ private enum ADBAndroidPublicKeyEncoder {
 
 public struct AOSPWiFiPairingProvider: ADBPairingProvider {
     public init() {}
+    public func makeCryptoEngine(code: String) throws -> any ADBPairingCryptoEngine {
+        try AOSPBoringSSLPairingEngine(password: Data(code.utf8))
+    }
     public func pair(code: String, device: ADBDevice) async throws {
-        guard !code.isEmpty else { throw ADBError.invalidArgument("pairing code") }
+        _ = try makeCryptoEngine(code: code)
         throw ADBError.pairingUnavailable
     }
 }
