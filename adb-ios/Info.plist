@@ -33,13 +33,6 @@
 	</array>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>ADBKit needs local network access to discover and connect to Android devices.</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_adb-tls-pairing._tcp</string>
-		<string>_adb-tls-connect._tcp</string>
-	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
@@ -59,4 +52,3 @@
 	</array>
 </dict>
 </plist>
-
