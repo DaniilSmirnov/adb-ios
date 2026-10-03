@@ -19,7 +19,7 @@ public final class ADBNetworkTransport: ADBByteTransport, @unchecked Sendable {
 
     private func start() async throws {
         guard !started else { return }; started = true
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.stateUpdateHandler = { state in
                 switch state { case .ready: continuation.resume(); case .failed(let error): continuation.resume(throwing: error); default: break }
             }
