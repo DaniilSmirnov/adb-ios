@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8191" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -14,82 +16,101 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sgb-tL-3Sq">
-                                <rect key="frame" x="111" y="60" width="86" height="30"/>
-                                <animations/>
-                                <state key="normal" title="adb connect"/>
-                                <connections>
-                                    <action selector="connectBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ngc-LO-4Et"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4GE-ft-efY">
-                                <rect key="frame" x="60" y="98" width="189" height="30"/>
-                                <animations/>
-                                <state key="normal" title="adb install apk"/>
-                                <connections>
-                                    <action selector="installApkBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gvc-Jd-b3Z"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bjU-br-Ke0">
-                                <rect key="frame" x="85" y="145" width="138" height="30"/>
-                                <animations/>
-                                <state key="normal" title="uninstall apk"/>
-                                <connections>
-                                    <action selector="uninstallApkBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="QDn-VI-Ejk"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YKs-3Z-r8L">
-                                <rect key="frame" x="124" y="189" width="61" height="30"/>
-                                <animations/>
-                                <state key="normal" title="start apk"/>
-                                <connections>
-                                    <action selector="startApk:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zkj-9Q-if0"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="e3j-ML-ZBg">
-                                <rect key="frame" x="116" y="269" width="76" height="30"/>
-                                <animations/>
-                                <state key="normal" title="disconnect"/>
-                                <connections>
-                                    <action selector="disconnect:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Y2n-pI-yUk"/>
-                                </connections>
-                            </button>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w6w-xR-7hO">
-                                <rect key="frame" x="0.0" y="351" width="320" height="249"/>
-                                <animations/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            </textView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="n7O-ia-bZI">
-                                <rect key="frame" x="90" y="231" width="128" height="30"/>
-                                <animations/>
-                                <state key="normal" title="list packages"/>
-                                <connections>
-                                    <action selector="ps:" destination="BYZ-38-t0r" eventType="touchUpInside" id="MQn-f2-b4U"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QY2-iQ-UzH">
-                                <rect key="frame" x="106" y="307" width="97" height="30"/>
-                                <animations/>
-                                <state key="normal" title="list devices"/>
-                                <connections>
-                                    <action selector="list:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qd3-5I-Mda"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="wOO-lJ-hBg">
+                                <rect key="frame" x="20" y="44" width="374" height="818"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" placeholderIntrinsicWidth="374" placeholderIntrinsicHeight="20" translatesAutoresizingMaskIntoConstraints="NO" id="Mz2-4A-jq2">
+                                        <rect key="frame" x="0.0" y="0.0" width="374" height="20.5"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="IP: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BhX-ym-HAV">
+                                                <rect key="frame" x="0.0" y="0.0" width="23.5" height="20.5"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="RXN-dq-u15">
+                                                <rect key="frame" x="23.5" y="0.0" width="350.5" height="20.5"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits"/>
+                                            </textField>
+                                        </subviews>
+                                    </stackView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sgb-tL-3Sq">
+                                        <rect key="frame" x="0.0" y="20.5" width="374" height="30"/>
+                                        <state key="normal" title="adb connect"/>
+                                        <connections>
+                                            <action selector="connectBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ngc-LO-4Et"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4GE-ft-efY">
+                                        <rect key="frame" x="0.0" y="50.5" width="374" height="30"/>
+                                        <state key="normal" title="adb install apk"/>
+                                        <connections>
+                                            <action selector="installApkBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="gvc-Jd-b3Z"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bjU-br-Ke0">
+                                        <rect key="frame" x="0.0" y="80.5" width="374" height="30"/>
+                                        <state key="normal" title="uninstall apk"/>
+                                        <connections>
+                                            <action selector="uninstallApkBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="QDn-VI-Ejk"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YKs-3Z-r8L">
+                                        <rect key="frame" x="0.0" y="110.5" width="374" height="30"/>
+                                        <state key="normal" title="start apk"/>
+                                        <connections>
+                                            <action selector="startApk:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zkj-9Q-if0"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="n7O-ia-bZI">
+                                        <rect key="frame" x="0.0" y="140.5" width="374" height="30"/>
+                                        <state key="normal" title="list packages"/>
+                                        <connections>
+                                            <action selector="ps:" destination="BYZ-38-t0r" eventType="touchUpInside" id="MQn-f2-b4U"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="e3j-ML-ZBg">
+                                        <rect key="frame" x="0.0" y="170.5" width="374" height="30"/>
+                                        <state key="normal" title="disconnect"/>
+                                        <connections>
+                                            <action selector="disconnect:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Y2n-pI-yUk"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QY2-iQ-UzH">
+                                        <rect key="frame" x="0.0" y="200.5" width="374" height="30"/>
+                                        <state key="normal" title="list devices"/>
+                                        <connections>
+                                            <action selector="list:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qd3-5I-Mda"/>
+                                        </connections>
+                                    </button>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w6w-xR-7hO">
+                                        <rect key="frame" x="0.0" y="230.5" width="374" height="587.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                </subviews>
+                            </stackView>
                         </subviews>
-                        <animations/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="wOO-lJ-hBg" secondAttribute="trailing" id="3Nv-ki-HTQ"/>
+                            <constraint firstItem="wOO-lJ-hBg" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="MOb-jm-GgC"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="wOO-lJ-hBg" secondAttribute="bottom" id="RcM-wX-24K"/>
+                            <constraint firstItem="wOO-lJ-hBg" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="jh2-5B-GTt"/>
+                        </constraints>
                     </view>
                     <connections>
+                        <outlet property="textField" destination="RXN-dq-u15" id="L2x-lO-fs5"/>
                         <outlet property="textview" destination="w6w-xR-7hO" id="fq8-I6-dRd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="305" y="277"/>
+            <point key="canvasLocation" x="304.34782608695656" y="276.5625"/>
         </scene>
     </scenes>
 </document>
