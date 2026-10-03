@@ -1,13 +1,17 @@
 #if canImport(UIKit) && canImport(WebKit)
 import UIKit
 import WebKit
+import UniformTypeIdentifiers
 
-public final class DeviceManagerWebViewController: UIViewController, WKScriptMessageHandler {
+public final class DeviceManagerWebViewController: UIViewController, WKScriptMessageHandler, UIDocumentPickerDelegate {
     private let router: DeviceManagerBridgeRouter
+    private let fileStore: DeviceManagerFileStore
     private var webView: WKWebView!
+    private var pendingFileRequestID: String?
 
     public init(backend: DeviceManagerNativeBackend) {
-        router = DeviceManagerBridgeRouter(backend: backend)
+        fileStore = DeviceManagerFileStore()
+        router = DeviceManagerBridgeRouter(backend: backend, fileProvider: fileStore)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -23,7 +27,7 @@ public final class DeviceManagerWebViewController: UIViewController, WKScriptMes
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        guard let url = Bundle.main.url(forResource: "DeviceManagerUI/index", withExtension: "html") else {
+        guard let url = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "DeviceManagerUI") else {
             webView.loadHTMLString("<h1>DeviceManager UI bundle is missing</h1>", baseURL: nil)
             return
         }
@@ -35,19 +39,47 @@ public final class DeviceManagerWebViewController: UIViewController, WKScriptMes
         Task {
             do {
                 let request = try await router.decode(body)
-                let response = await router.handle(request)
-                let encoded = try await router.encode(response)
-                let escaped = encoded.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "'", with: "\\'")
-                await MainActor.run {
-                    self.webView.evaluateJavaScript("window.__deviceManagerResolve('\(escaped)')")
+                if request.method == "file.select" {
+                    await MainActor.run {
+                        self.pendingFileRequestID = request.id
+                        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.data], asCopy: true)
+                        picker.delegate = self
+                        self.present(picker, animated: true)
+                    }
+                    return
                 }
+                let response = await router.handle(request)
+                await resolve(response)
             } catch {
                 let response = DeviceManagerBridgeResponse(id: "invalid", ok: false, error: error.localizedDescription)
-                if let encoded = try? await router.encode(response) {
-                    await MainActor.run { self.webView.evaluateJavaScript("window.__deviceManagerResolve('\(encoded)')") }
-                }
+                await resolve(response)
             }
         }
+    }
+
+    public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let id = pendingFileRequestID, let url = urls.first else { return }
+        pendingFileRequestID = nil
+        let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
+        Task { [fileStore] in
+            let token = await fileStore.register(url: url)
+            let file = DeviceManagerFilePayload(id: token, name: url.lastPathComponent, size: size, nativeToken: token)
+            let payload = try? JSONEncoder().encode(file)
+            await resolve(DeviceManagerBridgeResponse(id: id, ok: true, payload: payload))
+        }
+    }
+
+    public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        guard let id = pendingFileRequestID else { return }
+        pendingFileRequestID = nil
+        Task { await resolve(DeviceManagerBridgeResponse(id: id, ok: false, error: "File selection cancelled")) }
+    }
+
+    private func resolve(_ response: DeviceManagerBridgeResponse) async {
+        guard let encoded = try? await router.encode(response),
+              let literalData = try? JSONSerialization.data(withJSONObject: encoded),
+              let literal = String(data: literalData, encoding: .utf8) else { return }
+        await MainActor.run { self.webView.evaluateJavaScript("window.__deviceManagerResolve(\(literal))") }
     }
 
     deinit { webView?.configuration.userContentController.removeScriptMessageHandler(forName: "deviceManager") }

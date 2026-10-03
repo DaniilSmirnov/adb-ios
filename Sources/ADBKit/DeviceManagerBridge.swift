@@ -24,6 +24,39 @@ public struct DeviceManagerDevicePayload: Codable, Sendable {
     public init(device: ADBDevice) { self.device = device }
 }
 
+public struct DeviceManagerDeviceInfo: Codable, Sendable {
+    public let id: String
+    public let serial: String
+    public let status: String
+    public let transport: String
+    public let model: String?
+    public let manufacturer: String?
+    public let androidVersion: String?
+    public let sdkVersion: Int?
+    public let host: String
+    public let port: UInt16
+    public let capabilities: DeviceManagerCapabilities
+    public init(device: ADBDevice) {
+        id = device.id; serial = device.id; status = "device"
+        transport = device.transport == .tls ? "adb-tls" : device.transport == .wifiPairing ? "wifi-pairing" : "adb-tcp"
+        model = device.model; manufacturer = nil; androidVersion = nil; sdkVersion = nil
+        host = device.host; port = device.port
+        capabilities = DeviceManagerCapabilities(shell: true, install: true, uninstall: true, packageInfo: false, pairing: device.transport == .wifiPairing)
+    }
+}
+
+public struct DeviceManagerCapabilities: Codable, Sendable {
+    public let shell: Bool
+    public let install: Bool
+    public let uninstall: Bool
+    public let packageInfo: Bool
+    public let pairing: Bool
+    public init(shell: Bool, install: Bool, uninstall: Bool, packageInfo: Bool, pairing: Bool) {
+        self.shell = shell; self.install = install; self.uninstall = uninstall
+        self.packageInfo = packageInfo; self.pairing = pairing
+    }
+}
+
 public struct DeviceManagerShellPayload: Codable, Sendable {
     public let device: ADBDevice
     public let command: String
@@ -32,14 +65,43 @@ public struct DeviceManagerShellPayload: Codable, Sendable {
 
 public struct DeviceManagerInstallPayload: Codable, Sendable {
     public let device: ADBDevice
-    public let fileURL: String
-    public init(device: ADBDevice, fileURL: String) { self.device = device; self.fileURL = fileURL }
+    public let fileToken: String
+    public init(device: ADBDevice, fileToken: String) { self.device = device; self.fileToken = fileToken }
 }
 
 public struct DeviceManagerUninstallPayload: Codable, Sendable {
     public let device: ADBDevice
     public let packageName: String
     public init(device: ADBDevice, packageName: String) { self.device = device; self.packageName = packageName }
+}
+
+public struct DeviceManagerFilePayload: Codable, Sendable {
+    public let id: String
+    public let name: String
+    public let size: Int64
+    public let nativeToken: String
+    public init(id: String, name: String, size: Int64, nativeToken: String) {
+        self.id = id; self.name = name; self.size = size; self.nativeToken = nativeToken
+    }
+}
+
+public protocol DeviceManagerFileProvider: Sendable {
+    func url(for token: String) async throws -> URL
+}
+
+public actor DeviceManagerFileStore: DeviceManagerFileProvider {
+    private var files: [String: URL] = [:]
+    public init() {}
+    public func register(url: URL) -> String {
+        let token = UUID().uuidString
+        files[token] = url
+        return token
+    }
+    public func url(for token: String) async throws -> URL {
+        guard let url = files[token] else { throw ADBError.invalidArgument("unknown file token") }
+        return url
+    }
+    public func remove(token: String) { files.removeValue(forKey: token) }
 }
 
 public protocol DeviceManagerNativeBackend: Sendable {
@@ -60,16 +122,20 @@ public final class ADBDeviceManagerBackendAdapter: DeviceManagerNativeBackend, @
 
 public actor DeviceManagerBridgeRouter {
     private let backend: DeviceManagerNativeBackend
+    private let fileProvider: DeviceManagerFileProvider?
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
-    public init(backend: DeviceManagerNativeBackend) { self.backend = backend }
+    public init(backend: DeviceManagerNativeBackend, fileProvider: DeviceManagerFileProvider? = nil) {
+        self.backend = backend; self.fileProvider = fileProvider
+    }
 
     public func handle(_ request: DeviceManagerBridgeRequest) async -> DeviceManagerBridgeResponse {
         do {
             switch request.method {
             case "devices.list":
-                return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(await backend.listDevices()))
+                let devices = try await backend.listDevices()
+                return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(devices.map(DeviceManagerDeviceInfo.init)))
             case "device.shell":
                 let payload = try decode(DeviceManagerShellPayload.self, from: request.payload)
                 let result = try await backend.shell(payload.command, on: payload.device)
@@ -80,7 +146,9 @@ public actor DeviceManagerBridgeRouter {
                 return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(result))
             case "device.install":
                 let payload = try decode(DeviceManagerInstallPayload.self, from: request.payload)
-                let result = try await backend.install(apk: URL(fileURLWithPath: payload.fileURL), on: payload.device)
+                guard let fileProvider else { throw ADBError.invalidArgument("file provider is unavailable") }
+                let url = try await fileProvider.url(for: payload.fileToken)
+                let result = try await backend.install(apk: url, on: payload.device)
                 return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(result))
             default:
                 return DeviceManagerBridgeResponse(id: request.id, ok: false, error: "Unsupported DeviceManager method")
