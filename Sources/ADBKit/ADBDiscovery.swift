@@ -2,6 +2,11 @@ import Foundation
 import Network
 
 public final class ADBDiscovery: NSObject, @unchecked Sendable {
+    private final class BrowseState: @unchecked Sendable {
+        var latest: [NWBrowser.Result] = []
+        var resumed = false
+        let lock = NSLock()
+    }
     private var browser: NWBrowser?
     public override init() { super.init() }
 
@@ -33,20 +38,23 @@ public final class ADBDiscovery: NSObject, @unchecked Sendable {
         await withCheckedContinuation { continuation in
             let b = NWBrowser(for: .bonjour(type: type, domain: nil), using: .tcp)
             browser = b
-            var latest: [NWBrowser.Result] = []
-            var resumed = false
+            let state = BrowseState()
             let finish = {
-                guard !resumed else { return }
-                resumed = true
+                state.lock.lock(); defer { state.lock.unlock() }
+                guard !state.resumed else { return }
+                state.resumed = true
                 let transport: TransportKind = type == "_adb-tls-connect._tcp" ? .tls : .tcp
-                let devices = latest.compactMap { result -> ADBDevice? in
+                let devices = state.latest.compactMap { result -> ADBDevice? in
                     guard case let .service(name, _, _, _) = result.endpoint else { return nil }
                     return ADBDevice(id: name, host: name, port: 5555, transport: transport)
                 }
                 continuation.resume(returning: devices)
                 b.cancel()
             }
-            b.browseResultsChangedHandler = { results, _ in latest = Array(results); if !latest.isEmpty { finish() } }
+            b.browseResultsChangedHandler = { results, _ in
+                state.lock.lock(); state.latest = Array(results); let hasResults = !state.latest.isEmpty; state.lock.unlock()
+                if hasResults { finish() }
+            }
             b.stateUpdateHandler = { state in if case .failed = state { finish() } }
             b.start(queue: DispatchQueue(label: "adbkit.discovery.\(type)"))
             Task { try? await Task.sleep(for: timeout); finish() }
