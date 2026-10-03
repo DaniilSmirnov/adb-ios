@@ -1,14 +1,17 @@
-# adb-ios
-Android ADB on iOS. It works as the ADB host role on iOS through which one can **connect** to android devices.
+# adb-ios / ADBKit
+Android ADB on iOS. The repository now contains `ADBKit`, a direct device-side ADB host library for iOS and macOS.
 
 NOTE that this is **not** the ADB **daemon** program that is running inside the android device. 
 
 # Porting Details
-- ADB host (client + server architecture) on the iOS host side. The server uses the default port 5037.
+- Direct `adbd` connections are used; the app does not require an `adb server` or port 5037.
 
 - No USB supported
 
-- The client part exposes a few essential methods for iOS applications to integrate ADB functionalities.
+- `ADBClient` exposes async `connect`, `shell`, `install`, and `uninstall` operations.
+- `ADBDiscovery` provides Bonjour discovery for Wi‑Fi pairing services.
+- `KeychainADBKeyStore` keeps host keys outside the application bundle.
+- `DeviceBackend` is the UI-neutral adapter that can be consumed by UIKit, SwiftUI, or a shared APK Installer UI.
 
 - Application should include private/public key files in the application bundle (.ipa). The location and file name must be as this: 
  - [app-bundle-path]/android/adbkey 
@@ -40,5 +43,14 @@ NSString *apkPath = [[NSBundle mainBundle] pathForResource:@"Term" ofType:@"apk"
 }];
 
 </code></pre>
+
+## Build and test
+
+```sh
+swift test
+```
+
+The legacy Objective-C sample remains for compatibility, while new integrations should use `Sources/ADBKit`.
+The production Wi‑Fi pairing implementation must link the AOSP/BoringSSL pairing code; this project intentionally does not implement custom cryptography.
 
 
