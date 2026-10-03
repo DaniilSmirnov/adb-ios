@@ -7,7 +7,7 @@ let pairingCxxSettings: [CXXSetting] = [.unsafeFlags(["-std=c++17"])] + (boringS
     [.define("ADBKit_BoringSSL_ENABLED"), .unsafeFlags(["-I\($0)/include"])]
 } ?? [])
 let pairingLinkerSettings: [LinkerSetting] = boringSSLRoot.map {
-    [.unsafeFlags(["-L\($0)/build/crypto"]), .linkedLibrary("crypto")]
+    [.unsafeFlags(["-L\($0)/build"]), .linkedLibrary("crypto")]
 } ?? []
 
 let package = Package(
