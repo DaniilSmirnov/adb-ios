@@ -134,7 +134,11 @@ public final class ADBSession: @unchecked Sendable {
     }
 
     private func readExactly(_ count: Int) async throws -> Data {
-        while readBuffer.count < count { readBuffer.append(try await transport.receive(upTo: max(1, count - readBuffer.count))) }
+        while readBuffer.count < count {
+            let chunk = try await transport.receive(upTo: max(1, count - readBuffer.count))
+            guard !chunk.isEmpty else { throw ADBError.connectionClosed }
+            readBuffer.append(chunk)
+        }
         let result = readBuffer.prefix(count); readBuffer.removeFirst(count); return Data(result)
     }
 
