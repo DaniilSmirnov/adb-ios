@@ -1,3 +1,11 @@
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-FileNotFoundError: [Errno 2] No such file or directory: '.github/workflows/ios.yml'
+name: iOS
+on: [push, pull_request]
+jobs:
+  swift-package:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test ADBKit
+        run: swift test
+      - name: Build archived app
+        run: xcodebuild -workspace adb-ios.xcworkspace -scheme adb-ios -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
