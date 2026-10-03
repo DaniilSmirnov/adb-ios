@@ -19,6 +19,29 @@ public struct DeviceManagerBridgeResponse: Codable, Sendable {
     }
 }
 
+public struct DeviceManagerDevicePayload: Codable, Sendable {
+    public let device: ADBDevice
+    public init(device: ADBDevice) { self.device = device }
+}
+
+public struct DeviceManagerShellPayload: Codable, Sendable {
+    public let device: ADBDevice
+    public let command: String
+    public init(device: ADBDevice, command: String) { self.device = device; self.command = command }
+}
+
+public struct DeviceManagerInstallPayload: Codable, Sendable {
+    public let device: ADBDevice
+    public let fileURL: String
+    public init(device: ADBDevice, fileURL: String) { self.device = device; self.fileURL = fileURL }
+}
+
+public struct DeviceManagerUninstallPayload: Codable, Sendable {
+    public let device: ADBDevice
+    public let packageName: String
+    public init(device: ADBDevice, packageName: String) { self.device = device; self.packageName = packageName }
+}
+
 public protocol DeviceManagerNativeBackend: Sendable {
     func listDevices() async throws -> [ADBDevice]
     func install(apk: URL, on device: ADBDevice) async throws -> ADBCommandResult
@@ -47,12 +70,29 @@ public actor DeviceManagerBridgeRouter {
             switch request.method {
             case "devices.list":
                 return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(await backend.listDevices()))
+            case "device.shell":
+                let payload = try decode(DeviceManagerShellPayload.self, from: request.payload)
+                let result = try await backend.shell(payload.command, on: payload.device)
+                return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(result))
+            case "device.uninstall":
+                let payload = try decode(DeviceManagerUninstallPayload.self, from: request.payload)
+                let result = try await backend.uninstall(package: payload.packageName, on: payload.device)
+                return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(result))
+            case "device.install":
+                let payload = try decode(DeviceManagerInstallPayload.self, from: request.payload)
+                let result = try await backend.install(apk: URL(fileURLWithPath: payload.fileURL), on: payload.device)
+                return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(result))
             default:
                 return DeviceManagerBridgeResponse(id: request.id, ok: false, error: "Unsupported DeviceManager method")
             }
         } catch {
             return DeviceManagerBridgeResponse(id: request.id, ok: false, error: error.localizedDescription)
         }
+    }
+
+    private func decode<T: Decodable>(_ type: T.Type, from data: Data?) throws -> T {
+        guard let data else { throw ADBError.invalidArgument("bridge payload") }
+        return try decoder.decode(type, from: data)
     }
 
     public func decode(_ message: String) throws -> DeviceManagerBridgeRequest {
