@@ -42,6 +42,16 @@ public struct DeviceManagerUninstallPayload: Codable, Sendable {
     public init(device: ADBDevice, packageName: String) { self.device = device; self.packageName = packageName }
 }
 
+public struct DeviceManagerFilePayload: Codable, Sendable {
+    public let id: String
+    public let name: String
+    public let size: Int64
+    public let nativeToken: String
+    public init(id: String, name: String, size: Int64, nativeToken: String) {
+        self.id = id; self.name = name; self.size = size; self.nativeToken = nativeToken
+    }
+}
+
 public protocol DeviceManagerNativeBackend: Sendable {
     func listDevices() async throws -> [ADBDevice]
     func install(apk: URL, on device: ADBDevice) async throws -> ADBCommandResult
