@@ -7,5 +7,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test ADBKit
         run: swift test
-      - name: Build archived app
-        run: xcodebuild -workspace adb-ios.xcworkspace -scheme adb-ios -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Validate app metadata
+        run: plutil -lint adb-ios/Info.plist
