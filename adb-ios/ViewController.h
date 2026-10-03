@@ -12,6 +12,7 @@
 
 
 @property(strong, nonatomic) IBOutlet UITextView *textview;
+@property(strong, nonatomic) IBOutlet UITextField *textField;
 
 -(IBAction)connectBtn:(id)sender;
 -(IBAction)installApkBtn:(id)sender;
@@ -20,5 +21,5 @@
 -(IBAction)disconnect:(id)sender;
 -(IBAction)ps:(id)sender;
 -(IBAction)list:(id)sender;
-@end
 
+@end
