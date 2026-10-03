@@ -57,7 +57,7 @@ public final class ADBSession: @unchecked Sendable {
         var output = Data()
         while true {
             let message = try await receive()
-            guard message.arg1 == stream.remoteID || message.command == .clse else { continue }
+            guard message.arg0 == stream.remoteID || message.command == .clse else { continue }
             switch message.command {
             case .wrte:
                 output.append(message.payload)
