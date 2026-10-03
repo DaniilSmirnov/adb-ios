@@ -1,0 +1,11 @@
+name: iOS
+on: [push, pull_request]
+jobs:
+  swift-package:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test ADBKit
+        run: swift test
+      - name: Validate app metadata
+        run: plutil -lint adb-ios/Info.plist
