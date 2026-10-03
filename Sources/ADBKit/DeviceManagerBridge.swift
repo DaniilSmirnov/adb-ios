@@ -24,6 +24,25 @@ public struct DeviceManagerDevicePayload: Codable, Sendable {
     public init(device: ADBDevice) { self.device = device }
 }
 
+public struct DeviceManagerDeviceInfo: Codable, Sendable {
+    public let id: String
+    public let serial: String
+    public let status: String
+    public let transport: String
+    public let model: String?
+    public let manufacturer: String?
+    public let androidVersion: String?
+    public let sdkVersion: Int?
+    public let host: String
+    public let port: UInt16
+    public init(device: ADBDevice) {
+        id = device.id; serial = device.id; status = "device"
+        transport = device.transport == .tls ? "adb-tls" : device.transport == .wifiPairing ? "wifi-pairing" : "adb-tcp"
+        model = device.model; manufacturer = nil; androidVersion = nil; sdkVersion = nil
+        host = device.host; port = device.port
+    }
+}
+
 public struct DeviceManagerShellPayload: Codable, Sendable {
     public let device: ADBDevice
     public let command: String
@@ -40,6 +59,16 @@ public struct DeviceManagerUninstallPayload: Codable, Sendable {
     public let device: ADBDevice
     public let packageName: String
     public init(device: ADBDevice, packageName: String) { self.device = device; self.packageName = packageName }
+}
+
+public struct DeviceManagerFilePayload: Codable, Sendable {
+    public let id: String
+    public let name: String
+    public let size: Int64
+    public let nativeToken: String
+    public init(id: String, name: String, size: Int64, nativeToken: String) {
+        self.id = id; self.name = name; self.size = size; self.nativeToken = nativeToken
+    }
 }
 
 public protocol DeviceManagerNativeBackend: Sendable {
@@ -69,7 +98,8 @@ public actor DeviceManagerBridgeRouter {
         do {
             switch request.method {
             case "devices.list":
-                return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(await backend.listDevices()))
+                let devices = try await backend.listDevices()
+                return DeviceManagerBridgeResponse(id: request.id, ok: true, payload: try encoder.encode(devices.map(DeviceManagerDeviceInfo.init)))
             case "device.shell":
                 let payload = try decode(DeviceManagerShellPayload.self, from: request.payload)
                 let result = try await backend.shell(payload.command, on: payload.device)
