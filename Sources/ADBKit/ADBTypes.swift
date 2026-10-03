@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ADBDevice: Identifiable, Hashable, Sendable {
+public struct ADBDevice: Identifiable, Hashable, Codable, Sendable {
     public let id: String
     public let host: String
     public let port: UInt16
@@ -13,7 +13,7 @@ public struct ADBDevice: Identifiable, Hashable, Sendable {
     }
 }
 
-public enum TransportKind: String, Sendable { case tcp, tls, wifiPairing }
+public enum TransportKind: String, Codable, Sendable { case tcp, tls, wifiPairing }
 
 public enum ADBError: Error, LocalizedError, Sendable {
     case invalidPacket, protocolError(String), connectionClosed, timeout
