@@ -5,11 +5,13 @@ import UniformTypeIdentifiers
 
 public final class DeviceManagerWebViewController: UIViewController, WKScriptMessageHandler, UIDocumentPickerDelegate {
     private let router: DeviceManagerBridgeRouter
+    private let fileStore: DeviceManagerFileStore
     private var webView: WKWebView!
     private var pendingFileRequestID: String?
 
     public init(backend: DeviceManagerNativeBackend) {
-        router = DeviceManagerBridgeRouter(backend: backend)
+        fileStore = DeviceManagerFileStore()
+        router = DeviceManagerBridgeRouter(backend: backend, fileProvider: fileStore)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -25,7 +27,7 @@ public final class DeviceManagerWebViewController: UIViewController, WKScriptMes
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        guard let url = Bundle.main.url(forResource: "DeviceManagerUI/index", withExtension: "html") else {
+        guard let url = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "DeviceManagerUI") else {
             webView.loadHTMLString("<h1>DeviceManager UI bundle is missing</h1>", baseURL: nil)
             return
         }
@@ -59,8 +61,9 @@ public final class DeviceManagerWebViewController: UIViewController, WKScriptMes
         guard let id = pendingFileRequestID, let url = urls.first else { return }
         pendingFileRequestID = nil
         let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
-        let file = DeviceManagerFilePayload(id: UUID().uuidString, name: url.lastPathComponent, size: size, nativeToken: url.path)
-        Task {
+        Task { [fileStore] in
+            let token = await fileStore.register(url: url)
+            let file = DeviceManagerFilePayload(id: token, name: url.lastPathComponent, size: size, nativeToken: token)
             let payload = try? JSONEncoder().encode(file)
             await resolve(DeviceManagerBridgeResponse(id: id, ok: true, payload: payload))
         }
