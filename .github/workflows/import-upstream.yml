@@ -33,3 +33,5 @@ jobs:
           git add -A
           git commit -m "chore: import legacy adb-ios sources"
           git push
+
+# trigger import after workflow registration
