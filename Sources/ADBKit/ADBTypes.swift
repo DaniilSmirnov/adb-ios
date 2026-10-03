@@ -36,7 +36,7 @@ public enum ADBError: Error, LocalizedError, Sendable {
     }
 }
 
-public struct ADBCommandResult: Sendable {
+public struct ADBCommandResult: Codable, Sendable {
     public let output: String
     public let exitCode: Int32?
     public init(output: String, exitCode: Int32? = nil) { self.output = output; self.exitCode = exitCode }
