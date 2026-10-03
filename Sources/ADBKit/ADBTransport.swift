@@ -29,7 +29,7 @@ public final class ADBNetworkTransport: ADBByteTransport, @unchecked Sendable {
 
     public func send(_ data: Data) async throws {
         try await start()
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.send(content: data, completion: .contentProcessed { error in
                 if let error { continuation.resume(throwing: error) } else { continuation.resume() }
             })
